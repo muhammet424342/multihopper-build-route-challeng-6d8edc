@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StableReceipt Solana Demo</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f7fa;
+      color: #333;
+    }
+    h1, h2 {
+      color: #2c3e50;
+      text-align: center;
+    }
+    .demo-container {
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      padding: 25px;
+      margin-top: 20px;
+    }
+    .input-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    button {
+      background: #3498db;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+      margin-top: 10px;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #2980b9;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 5px;
+      background-color: #f0f8ff;
+      display: none;
+    }
+    .receipt {
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin-top: 20px;
+      background-color: #fff;
+      border-radius: 5px;
+    }
+    .receipt-header {
+      text-align: center;
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+    .receipt-item {
+      margin-bottom: 10px;
+      padding-bottom: 5px;
+      border-bottom: 1px dashed #eee;
+    }
+    .receipt-item span {
+      font-weight: bold;
+      color: #34495e;
+    }
+    .status {
+      font-weight: bold;
+      text-align: center;
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 5px;
+      color: white;
+    }
+    .success {
+      background-color: #27ae60;
+    }
+    .error {
+      background-color: #e74c3c;
+    }
+    .loading {
+      background-color: #f39c12;
+    }
+    .status-container {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .demo-info {
+      margin-top: 30px;
+      padding: 15px;
+      background-color: #e8f4fd;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+    .demo-info h3 {
+      color: #2980b9;
+      margin-top: 0;
+    }
+    .demo-info p {
+      margin-bottom: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>StableReceipt Solana Demo</h1>
+  <h2>Automated Invoice Reconciliation</h2>
+  
+  <div class="demo-container">
+    <div class="input-group">
+      <label for="wallet">Wallet Address:</label>
+      <input type="text" id="wallet" placeholder="Enter Solana wallet address">
+    </div>
+    
+    <div class="input-group">
+      <label for="invoiceId">Invoice ID:</label>
+      <input type="text" id="invoiceId" placeholder="INV-001">
+    </div>
+    
+    <div class="input-group">
+      <label for="amount">Amount (USDC):</label>
+      <input type="number" id="amount" min="0" step="0.01" value="100">
+    </div>
+    
+    <button id="generateReceipt">Generate Receipt</button>
+    
+    <div class="status-container">
+      <div id="status" class="status"></div>
+    </div>
+    
+    <div id="result" class="result">
+      <div class="receipt">
+        <div class="receipt-header">PROOF OF PAYMENT RECEIPT</div>
+        <div class="receipt-item"><span>Invoice ID:</span> <span id="receiptInvoiceId"></span></div>
+        <div class="receipt-item"><span>Wallet:</span> <span id="receiptWallet"></span></div>
+        <div class="receipt-item"><span>Amount:</span> <span id="receiptAmount"></span> USDC</div>
+        <div class="receipt-item"><span>Network:</span> <span>Solana</span></div>
+        <div class="receipt-item"><span>Status:</span> <span id="receiptStatus"></span></div>
+        <div class="receipt-item"><span>Timestamp:</span> <span id="receiptTimestamp"></span></div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="demo-info">
+    <h3>How This Demo Works</h3>
+    <p>This is a simulation of the StableReceipt Solana system. In a real implementation, this would:</p>
+    <ul>
+      <li>Query Solana RPC for USDC transfers to the specified wallet</li>
+      <li>Match transactions to the provided invoice ID</li>
+      <li>Generate a professional PDF receipt with USD valuation</li>
+      <li>Integrate with MultiHopper for optimized payment routing</li>
+    </ul>
+    <p><strong>Note:</strong> This demo runs locally and does not connect to actual Solana networks or MultiHopper API.</p>
+  </div>
+
+  <script>
+    // Simulated data to represent what would be fetched from Solana and MultiHopper
+    const simulatedTransactions = [
+      { id: 'tx1', wallet: 'wallet1', amount: 100, timestamp: '2023-10-15T10:30:00Z' },
+      { id: 'tx2', wallet: 'wallet2', amount: 250, timestamp: '2023-10-15T11:15:00Z' },
+      { id: 'tx3', wallet: 'wallet1', amount: 75, timestamp: '2023-10-15T12:45:00Z' },
+      { id: 'tx4', wallet: 'wallet3', amount: 125, timestamp: '2023-10-15T14:20:00Z' },
+      { id: 'tx5', wallet: 'wallet1', amount: 100, timestamp: '2023-10-15T15:00:00Z' }
+    ];
+
+    const simulatedInvoices = [
+      { id: 'INV-001', amount: 100, status: 'paid' },
+      { id: 'INV-002', amount: 250, status: 'pending' },
+      { id: 'INV-003', amount: 75, status: 'paid' },
+      { id: 'INV-004', amount: 125, status: 'paid' },
+      { id: 'INV-005', amount: 100, status: 'paid' }
+    ];
+
+    // DOM elements
+    const generateBtn = document.getElementById('generateReceipt');
+    const resultDiv = document.getElementById('result');
+    const statusDiv = document.getElementById('status');
+    const receiptInvoiceId = document.getElementById('receiptInvoiceId');
+    const receiptWallet = document.getElementById('receiptWallet');
+    const receiptAmount = document.getElementById('receiptAmount');
+    const receiptStatus = document.getElementById('receiptStatus');
+    const receiptTimestamp = document.getElementById('receiptTimestamp');
+    
+    // Simulated Solana RPC lookup
+    function lookupSolanaTransaction(wallet, invoiceId, amount) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          // In a real implementation, this would query the Solana RPC
+          // For this demo, we'll simulate a match based on the input
+          const transaction = simulatedTransactions.find(t => 
+            t.wallet === wallet && t.amount === amount
+          );
+          
+          if (transaction) {
+            const invoice = simulatedInvoices.find(i => i.id === invoiceId);
+            if (invoice && invoice.amount === amount) {
+              resolve({
+                matched: true,
+                transaction: transaction,
+                invoice: invoice,
+                timestamp: transaction.timestamp
+              });
+            } else {
+              resolve({
+                matched: false,
+                error: 'Invoice amount does not match transaction amount'
+              });
+            }
+          } else {
+            resolve({
+              matched: false,
+              error: 'No matching transaction found'
+            });
+          }
+        }, 1500); // Simulate network delay
+      });
+    }
+
+    // Simulated MultiHopper routing
+    function routePayment(wallet, amount, invoiceId) {
+      return new Promise((resolve) => {
+        setTimeout(() => {
+          // In a real implementation, this would call MultiHopper API
+          // For this demo, we'll just simulate a successful routing
+          resolve({
+            routed: true,
+            routeId: `route-${Date.now()}`,
+            fee: amount * 0.001,
+            timestamp: new Date().toISOString()
+          });
+        }, 1000);
+      });
+    }
+
+    // Generate a PDF receipt (simulated)
+    function generatePdfReceipt(data) {
+      // In a real implementation, this would use a PDF library
+      // For this demo, we'll just show the receipt data
+      return {
+        data: data,
+        url: 'data:application/pdf;base64,'
+      };
+    }
+
+    // Handle form submission
+    generateBtn.addEventListener('click', async () => {
+      const wallet = document.getElementById('wallet').value.trim();
+      const invoiceId = document.getElementById('invoiceId').value.trim();
+      const amount = parseFloat(document.getElementById('amount').value);
+
+      if (!wallet || !invoiceId || isNaN(amount) || amount <= 0) {
+        statusDiv.textContent = 'Please fill in all fields with valid values';
+        statusDiv.className = 'status error';
+        return;
+      }
+
+      // Show loading status
+      statusDiv.textContent = 'Looking up transaction...';
+      statusDiv.className = 'status loading';
+      resultDiv.style.display = 'none';
+
+      try {
+        // Step 1: Look up the transaction on Solana
+        const lookupResult = await lookupSolanaTransaction(wallet, invoiceId, amount);
+        
+        if (!lookupResult.matched) {
+          throw new Error(lookupResult.error || 'Transaction not found');
+        }
+
+        // Step 2: Simulate routing through MultiHopper
+        const routingResult = await routePayment(wallet, amount, invoiceId);
+
+        // Step 3: Generate the receipt
+        const receiptData = {
+          invoiceId: invoiceId,
+          wallet: wallet,
+          amount: amount,
+          network: 'Solana',
+          status: 'matched',
+          timestamp: lookupResult.timestamp,
+          routeId: routingResult.routeId,
+          fee: routingResult.fee
+        };
+
+        // Display the result
+        receiptInvoiceId.textContent = receiptData.invoiceId;
+        receiptWallet.textContent = receiptData.wallet;
+        receiptAmount.textContent = receiptData.amount.toFixed(2);
+        receiptStatus.textContent = receiptData.status;
+        receiptTimestamp.textContent = new Date(receiptData.timestamp).toLocaleString();
+
+        // Show success status
+        statusDiv.textContent = 'Receipt generated successfully!';
+        statusDiv.className = 'status success';
+
+        // Show the result
+        resultDiv.style.display = 'block';
+        
+      } catch (error) {
+        statusDiv.textContent = `Error: ${error.message}`;
+        statusDiv.className = 'status error';
+      }
+    });
+  </script>
+</body>
+</html>
